@@ -6,10 +6,15 @@
 
 #include "tic-tac-toe.h"
 
+// game state
+struct GameState {
+    char player_piece;
+    char opponent_piece;
+    char game_board[3][3];
+};
+
 // global variables
-char player_piece;
-char opponent_piece;
-char game_board[3][3];
+struct GameState state;
 
 int main() {
     bool player_turn;
@@ -20,26 +25,26 @@ int main() {
 
     // game loop
     do {
-        reset_board();
-        player_turn = randomize_first_turn();
+        reset_board(&state);
+        player_turn = randomize_first_turn(&state);
 
         // turn loop
         do {
-            print_board();
+            print_board(&state);
 
             if (player_turn) {
                 player_turn = false;
-                get_player_move();
+                get_player_move(&state);
             } else {
                 player_turn = true;
-                get_computer_move();
+                get_computer_move(&state);
             }
 
-            game_result = check_game_result();
+            game_result = check_game_result(&state);
 
         } while (game_result == IN_PROGRESS);
 
-        print_board();
+        print_board(&state);
 
         if (game_result == PLAYER_WIN) {
             printf("You win!\n");
@@ -57,31 +62,31 @@ int main() {
     return 0;
 }
 
-void reset_board() {
+void reset_board(struct GameState *state) {
     int i, j;
 
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
-            game_board[i][j] = ' ';
+            state->game_board[i][j] = ' ';
         }
     }
 }
 
-bool randomize_first_turn() {
+bool randomize_first_turn(struct GameState *state) {
     int random_number;
 
     random_number = rand() % 2;
 
     if (random_number == 0) {
-        player_piece = 'X';
-        opponent_piece = 'O';
+        state->player_piece = 'X';
+        state->opponent_piece = 'O';
 
         printf("You are X. Computer is O.\n");
 
         return true;
     } else {
-        player_piece = 'O';
-        opponent_piece = 'X';
+        state->player_piece = 'O';
+        state->opponent_piece = 'X';
 
         printf("Computer is X. You are O.\n");
 
@@ -89,13 +94,13 @@ bool randomize_first_turn() {
     }
 }
 
-void print_board() {
+void print_board(struct GameState *state) {
     int i;
 
     printf("\n");
 
     for (i = 0; i < 3; i++) {
-        printf(" %c | %c | %c\n", game_board[i][0], game_board[i][1], game_board[i][2]);
+        printf(" %c | %c | %c\n", state->game_board[i][0], state->game_board[i][1], state->game_board[i][2]);
 
         if (i != 2) {
             printf("---|---|---\n");
@@ -105,7 +110,7 @@ void print_board() {
     printf("\n");
 }
 
-void get_player_move() {
+void get_player_move(struct GameState *state) {
     int x, y;
 
     printf("Enter coordinates (row column): ");
@@ -114,63 +119,63 @@ void get_player_move() {
     x--;
     y--;
 
-    if (game_board[x][y] != ' ') {
-        printf("\nSquare is already occupied.\n");
-        get_player_move();
+    if (x < 0 || x > 2 || y < 0 || y > 2 || state->game_board[x][y] != ' ') {
+        printf("\nInvalid move.\n");
+        get_player_move(state);
     } else {
-        game_board[x][y] = player_piece;
+        state->game_board[x][y] = state->player_piece;
     }
 }
 
-int check_game_result() {
+int check_game_result(struct GameState *state) {
     int i, j;
 
     // check for player win
     for (i = 0; i < 3; i++) {
-        if (game_board[i][0] == player_piece && game_board[i][1] == player_piece && game_board[i][2] == player_piece) {
+        if (state->game_board[i][0] == state->player_piece && state->game_board[i][1] == state->player_piece && state->game_board[i][2] == state->player_piece) {
             return PLAYER_WIN;
         }
     }
 
     for (i = 0; i < 3; i++) {
-        if (game_board[0][i] == player_piece && game_board[1][i] == player_piece && game_board[2][i] == player_piece) {
+        if (state->game_board[0][i] == state->player_piece && state->game_board[1][i] == state->player_piece && state->game_board[2][i] == state->player_piece) {
             return PLAYER_WIN;
         }
     }
 
-    if (game_board[0][0] == player_piece && game_board[1][1] == player_piece && game_board[2][2] == player_piece) {
+    if (state->game_board[0][0] == state->player_piece && state->game_board[1][1] == state->player_piece && state->game_board[2][2] == state->player_piece) {
         return PLAYER_WIN;
     }
 
-    if (game_board[0][2] == player_piece && game_board[1][1] == player_piece && game_board[2][0] == player_piece) {
+    if (state->game_board[0][2] == state->player_piece && state->game_board[1][1] == state->player_piece && state->game_board           [2][0] == state->player_piece) {
         return PLAYER_WIN;
     }
 
-    // check for computer win
+    // check for opponent win
     for (i = 0; i < 3; i++) {
-        if (game_board[i][0] == opponent_piece && game_board[i][1] == opponent_piece && game_board[i][2] == opponent_piece) {
+        if (state->game_board[i][0] == state->opponent_piece && state->game_board[i][1] == state->opponent_piece && state->game_board[i][2] == state->opponent_piece) {
             return COMPUTER_WIN;
         }
     }
 
     for (i = 0; i < 3; i++) {
-        if (game_board[0][i] == opponent_piece && game_board[1][i] == opponent_piece && game_board[2][i] == opponent_piece) {
+        if (state->game_board[0][i] == state->opponent_piece && state->game_board[1][i] == state->opponent_piece && state->game_board[2][i] == state->opponent_piece) {
             return COMPUTER_WIN;
         }
     }
 
-    if (game_board[0][0] == opponent_piece && game_board[1][1] == opponent_piece && game_board[2][2] == opponent_piece) {
+    if (state->game_board[0][0] == state->opponent_piece && state->game_board[1][1] == state->opponent_piece && state->game_board[2][2] == state->opponent_piece) {
         return COMPUTER_WIN;
     }
 
-    if (game_board[0][2] == opponent_piece && game_board[1][1] == opponent_piece && game_board[2][0] == opponent_piece) {
+    if (state->game_board[0][2] == state->opponent_piece && state->game_board[1][1] == state->opponent_piece && state->game_board[2][0] == state->opponent_piece) {
         return COMPUTER_WIN;
     }
 
     // check for draw
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
-            if (game_board[i][j] == ' ') {
+            if (state->game_board[i][j] == ' ') {
                 return IN_PROGRESS;
             }
         }
@@ -179,60 +184,63 @@ int check_game_result() {
     return DRAW;
 }
 
-void get_computer_move() {
-    int x, y;
-    bool found_move = false;
+void get_computer_move(struct GameState *state) {
+    int i, j;
+    bool move_made = false;
 
-    // try to find a winning move for the computer
-    for (x = 0; x < 3; x++) {
-        for (y = 0; y < 3; y++) {
-            if (game_board[x][y] == ' ') {
-                game_board[x][y] = opponent_piece;
+    // try to win
+    for (i = 0; i < 3; i++) {
+        for (j = 0; j < 3; j++) {
+            if (state->game_board[i][j] == ' ') {
+                state->game_board[i][j] = state->opponent_piece;
 
-                if (check_game_result() == COMPUTER_WIN) {
-                    found_move = true;
+                if (check_game_result(state) == COMPUTER_WIN) {
+                    move_made = true;
                     break;
                 }
 
-                game_board[x][y] = ' ';
+                state->game_board[i][j] = ' ';
             }
         }
 
-        if (found_move) {
+        if (move_made) {
             break;
         }
     }
 
-    // if there is no winning move, try to block the player's winning move
-    if (!found_move) {
-        for (x = 0; x < 3; x++) {
-            for (y = 0; y < 3; y++) {
-                if (game_board[x][y] == ' ') {
-                    game_board[x][y] = player_piece;
+    // block player win
+    if (!move_made) {
+        for (i = 0; i < 3; i++) {
+            for (j = 0; j < 3; j++) {
+                if (state->game_board[i][j] == ' ') {
+                    state->game_board[i][j] = state->player_piece;
 
-                    if (check_game_result() == PLAYER_WIN) {
-                        game_board[x][y] = opponent_piece;
-                        found_move = true;
+                    if (check_game_result(state) == PLAYER_WIN) {
+                        state->game_board[i][j] = state->opponent_piece;;
+                        move_made = true;
                         break;
                     }
 
-                    game_board[x][y] = ' ';
+                    state->game_board[i][j] = ' ';
                 }
             }
 
-            if (found_move) {
+            if (move_made) {
                 break;
             }
         }
     }
 
-    // if there is no winning or blocking move, choose a random empty square
-    if (!found_move) {
+    // pick random empty square
+    if (!move_made) {
         do {
-            x = rand() % 3;
-            y = rand() % 3;
-        } while (game_board[x][y] != ' ');
+            i = rand() % 3;
+            j = rand() % 3;
+        } while (state->game_board[i][j] != ' ');
 
-        game_board[x][y] = opponent_piece;
+        state->game_board[i][j] = state->opponent_piece;
     }
 }
+
+
+

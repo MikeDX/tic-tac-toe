@@ -1,10 +1,11 @@
 # Tic-Tac-Toe
 
-A simple implementation of the game Tic-Tac-Toe, written in C.
+A simple implementation of the game Tic-Tac-Toe, written in C using ChatGPT.
 
 ## Usage
 
 To build the game, run the following command:
+
 
 ```
 make
